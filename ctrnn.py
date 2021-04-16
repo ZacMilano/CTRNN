@@ -1,4 +1,3 @@
-from _typeshed import NoneType
 import numpy as np
 
 class CTRNN:
