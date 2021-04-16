@@ -1,11 +1,11 @@
 import numpy as np
 
 class CTRNN:
-	def __init__(self, n_neurons, initial_activations=None, weights=None, biases=None,
-	             time_constants=None, inputs=None, dt=0.01):
+	def __init__(self, n_neurons, initial_activations=None, weights=None,
+							 biases=None, time_constants=None, inputs=None, dt=0.01):
 		"""
 		Continuous-Time Recurrent Neural Network. Used to simulate systems like
-			multi-species (N > 2) ecosystems.
+			multi-species (N >= 2) ecosystems.
 
 		n_neurons : int
 			Number of neurons, species, etc. to simulate within the CTRNN
@@ -31,8 +31,9 @@ class CTRNN:
 		def validate(to_validate, name, shape):
 			if type(to_validate) not in {type(None), np.ndarray} or \
 				np.shape(to_validate) != shape:
-				shape_string = f"{shape[0]}x{shape[1]}" if type(shape) is tuple else \
-					f"{shape}-length"
+				# (2,3) --> "2x3", (5,) --> "5", (6,7,2) --> "6x7x2"
+				shape_string = f"{'x'.join(map(str, shape))}" if type(shape) is tuple \
+					else f"{shape}-length"
 				raise ValueError(
 					f"Your value given for {name} is not a(n) {shape_string}" +
 					f"(n_neurons={n_neurons}) np.ndarray. Given {to_validate}, of type " +
