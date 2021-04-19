@@ -28,16 +28,16 @@ class CTRNN:
 		# Not sure how to get name of variable from variable itself; usually this is
 		# tricky or impossible, so we use the `name` parameter instead.
 		def validate(to_validate, name, shape):
-			if type(to_validate) not in {type(None), np.ndarray} or \
-				np.shape(to_validate) != shape:
-				# (2,3) --> "2x3", (5,) --> "5", (6,7,2) --> "6x7x2"
-				shape_string = f"{'x'.join(map(str, shape))}" if type(shape) is tuple \
-					else f"{shape}-length"
-				raise ValueError(
-					f"Your value given for {name} is not a(n) {shape_string}" +
-					f"(N={N}) np.ndarray. Given {to_validate}, of type " +
-					f"{type(to_validate)}, shape {np.shape(to_validate)}."
-				)
+			if type(to_validate) not in {type(None), np.ndarray}:
+				if np.shape(to_validate) != shape:
+					# (2,3) --> "2x3", (5,) --> "5", (6,7,2) --> "6x7x2"
+					shape_string = f"{'x'.join(map(str, shape))}" if type(shape) is tuple \
+						else f"{shape}-length"
+					raise ValueError(
+						f"Your value given for {name} is not a(n) {shape_string} " +
+						f"(N={N}) np.ndarray. Given {to_validate}, of type " +
+						f"{type(to_validate)}, shape {np.shape(to_validate)}."
+					)
 
 		validate(initial_activations, "initial_activations", N)
 		validate(weights, "weights", (N, N))
@@ -45,6 +45,7 @@ class CTRNN:
 		validate(time_constants, "time_constants", N)
 
 		self.N = N
+		self.dt = dt
 		# After these initializations, all are np.ndarray's of the proper shape
 		self.activations = initial_activations if initial_activations is not None \
 			else CTRNN._default_weights(self.N)
@@ -56,12 +57,15 @@ class CTRNN:
 			else CTRNN._default_weights(self.N)
 		self.inputs = inputs if inputs is not None \
 			else CTRNN._default_weights(self.N)
-		self.dt = dt
 	
-	def step(self, t):
+	def step(self):
 		# TODO: This. Use the discrete differential equation-type algorithm given in
 		# lecture.
-		pass
+		previous_activations = self.activations
+		biased = CTRNN._sigmoid(previous_activations + self.biases)
+		with_weights = np.matmul(self.weights, biased)
+		self.activations += self.dt * (-previous_activations + with_weights + \
+			self.inputs) / self.time_constants
 	
 	def _default_weights(shape):
 		"""
@@ -70,7 +74,8 @@ class CTRNN:
 
 		shape : int or Tuple<int>
 		"""
-		return np.zeros(shape)
+		return np.random.normal(loc=0.0, scale=0.5, size=shape)
+		# return np.zeros(shape)
 	
 	def _sigmoid(x):
 		"""
@@ -79,6 +84,6 @@ class CTRNN:
 		we'll only be using this function within the class, so I see no need to have
 		it be importable to other files.
 
-		x : float
+		x : float or np.ndarray<float>
 		"""
 		return 1.0 / (1.0 + np.exp(-x))
