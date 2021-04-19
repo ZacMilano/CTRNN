@@ -59,8 +59,6 @@ class CTRNN:
 			else CTRNN._default_weights(self.N)
 	
 	def step(self):
-		# TODO: This. Use the discrete differential equation-type algorithm given in
-		# lecture.
 		previous_activations = self.activations
 		biased = CTRNN._sigmoid(previous_activations + self.biases)
 		with_weights = np.matmul(self.weights, biased)
