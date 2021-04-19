@@ -1,33 +1,32 @@
 import numpy as np
 
 class CTRNN:
-	def __init__(self, n_neurons, initial_activations=None, weights=None,
-							 biases=None, time_constants=None, inputs=None, dt=0.01):
+	def __init__(self, N, dt=0.01, initial_activations=None, weights=None,
+							 biases=None, time_constants=None, inputs=None,):
 		"""
 		Continuous-Time Recurrent Neural Network. Used to simulate systems like
 			multi-species (N >= 2) ecosystems.
 
-		n_neurons : int
+		N : int
 			Number of neurons, species, etc. to simulate within the CTRNN
-		initial_activations : np.array[n_neurons]<number>
-			Initial activation values for each neuron.
-		weights : np.array[n_neurons, n_neurons]<number>
-			Weight values between each neuron. weights[i,i] = 0 (or 1? TODO) for all i.
-		biases : np.array[n_neurons]<number>
-			Bias weight offsets at each neuron.
-		time_constants : np.array[n_neurons]<number>
-			Time constants of each post neuron. Not sure what this is.
-		inputs : unknown so far; np.array[n_neurons]<number -> number>
-			External input? Not sure. It seems to me like we could just have biases
-			be a vector of 0's and have inputs' values at each point in time account
-			for the constant offset of biases.
-		dt : number
+		dt : float
 			Length of time between each step.
+		initial_activations : np.array[N]<float>
+			Initial activation values for each neuron, at t=0.
+		weights : np.array[N, N]<float>
+			Weight strength values between each neuron.
+		biases : np.array[N]<float>
+			Bias weight offsets at each neuron.
+		time_constants : np.array[N]<float>
+			Time constants of each post-synapse neuron.
+		inputs : np.array[N]<float -> float>
+			External input. In this implementation, this will be a vector of 0's; we
+			are only considering the neural network in an isolated vacuum.
 		"""
 		# Validate initial activation, weights, biases, time constants; None is ok
 		# since we have CTRNN._default_weights().
 		# Not sure how to get name of variable from variable itself; usually this is
-		# tricky or impossible.
+		# tricky or impossible, so we use the `name` parameter instead.
 		def validate(to_validate, name, shape):
 			if type(to_validate) not in {type(None), np.ndarray} or \
 				np.shape(to_validate) != shape:
@@ -36,26 +35,27 @@ class CTRNN:
 					else f"{shape}-length"
 				raise ValueError(
 					f"Your value given for {name} is not a(n) {shape_string}" +
-					f"(n_neurons={n_neurons}) np.ndarray. Given {to_validate}, of type " +
+					f"(N={N}) np.ndarray. Given {to_validate}, of type " +
 					f"{type(to_validate)}, shape {np.shape(to_validate)}."
 				)
 
-		validate(initial_activations, "initial_activations", n_neurons)
-		validate(weights, "weights", (n_neurons, n_neurons))
-		validate(biases, "biases", n_neurons)
-		validate(time_constants, "time_constants", n_neurons)
+		validate(initial_activations, "initial_activations", N)
+		validate(weights, "weights", (N, N))
+		validate(biases, "biases", N)
+		validate(time_constants, "time_constants", N)
 
-		self.n_neurons = n_neurons
-		# After these initializations, activations, weights, and biases are all
-		# np.ndarrays of the proper shape
+		self.N = N
+		# After these initializations, all are np.ndarray's of the proper shape
 		self.activations = initial_activations if initial_activations is not None \
-			else CTRNN._default_weights(self.n_neurons)
+			else CTRNN._default_weights(self.N)
 		self.weights = weights if weights is not None \
-			else CTRNN._default_weights((self.n_neurons, self.n_neurons))
+			else CTRNN._default_weights((self.N, self.N))
 		self.biases = biases if biases is not None \
-			else CTRNN._default_weights(self.n_neurons)
-		# Array of functions?
-		self.inputs = inputs
+			else CTRNN._default_weights(self.N)
+		self.time_constants = time_constants if time_constants is not None \
+			else CTRNN._default_weights(self.N)
+		self.inputs = inputs if inputs is not None \
+			else CTRNN._default_weights(self.N)
 		self.dt = dt
 	
 	def step(self, t):
@@ -79,6 +79,6 @@ class CTRNN:
 		we'll only be using this function within the class, so I see no need to have
 		it be importable to other files.
 
-		x : number
+		x : float
 		"""
 		return 1.0 / (1.0 + np.exp(-x))
