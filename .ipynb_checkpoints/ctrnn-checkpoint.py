@@ -48,15 +48,19 @@ class CTRNN:
 		self.dt = dt
 		# After these initializations, all are np.ndarray's of the proper shape
 		self.activations = initial_activations if initial_activations is not None \
-			else CTRNN._default_weights(self.N)
+			else np.random.random(self.N)
 		self.weights = weights if weights is not None \
 			else CTRNN._default_weights((self.N, self.N))
 		self.biases = biases if biases is not None \
 			else CTRNN._default_weights(self.N)
-		self.time_constants = time_constants if time_constants is not None \
-			else CTRNN._default_weights(self.N)
+		# self.time_constants[i] is between [10dt, 100dt)
+		self.time_constants = np.clip(time_constants, 10*self.dt, 100*self.dt) \
+			if time_constants is not None \
+			else self.dt * np.exp(2*np.log(10) * np.random.random(self.N))
+			# else CTRNN._default_weights(self.N)
 		self.inputs = inputs if inputs is not None \
-			else CTRNN._default_weights(self.N)
+			else np.zeros(self.N)
+			# else CTRNN._default_weights(self.N)
 	
 	def step(self):
 		previous_activations = self.activations
@@ -72,7 +76,7 @@ class CTRNN:
 
 		shape : int or Tuple<int>
 		"""
-		return np.random.normal(loc=0.0, scale=0.5, size=shape)
+		return np.random.normal(loc=0.0, scale=1.0, size=shape)
 		# return np.zeros(shape)
 	
 	def _sigmoid(x):
@@ -84,4 +88,5 @@ class CTRNN:
 
 		x : float or np.ndarray<float>
 		"""
-		return 1.0 / (1.0 + np.exp(-x))
+		# np.clip() to prevent overflow errors
+		return 1.0 / (1.0 + np.exp(np.clip(-x, -100, 100)))

@@ -56,7 +56,7 @@ class CTRNN:
 		# self.time_constants[i] is between [10dt, 100dt)
 		self.time_constants = np.clip(time_constants, 10*self.dt, 100*self.dt) \
 			if time_constants is not None \
-			else self.dt * np.exp(2*np.log(10) * np.random.random())
+			else self.dt * np.exp(2*np.log(10) * np.random.random(self.N))
 			# else CTRNN._default_weights(self.N)
 		self.inputs = inputs if inputs is not None \
 			else np.zeros(self.N)
@@ -76,7 +76,7 @@ class CTRNN:
 
 		shape : int or Tuple<int>
 		"""
-		return np.random.normal(loc=0.0, scale=0.2, size=shape)
+		return np.random.normal(loc=1.0, scale=1.0, size=shape)
 		# return np.zeros(shape)
 	
 	def _sigmoid(x):
