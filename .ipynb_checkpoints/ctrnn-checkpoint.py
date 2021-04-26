@@ -50,9 +50,9 @@ class CTRNN:
 		self.activations = initial_activations if initial_activations is not None \
 			else np.random.random(self.N)
 		self.weights = weights if weights is not None \
-			else CTRNN._default_weights((self.N, self.N))
+			else 4.0 * np.random.random((self.N, self.N))
 		self.biases = biases if biases is not None \
-			else CTRNN._default_weights(self.N)
+			else np.random.random(self.N)
 		# self.time_constants[i] is between [10dt, 100dt)
 		self.time_constants = np.clip(time_constants, 10*self.dt, 100*self.dt) \
 			if time_constants is not None \
@@ -63,6 +63,10 @@ class CTRNN:
 			# else CTRNN._default_weights(self.N)
 	
 	def step(self):
+		"""
+		Go through 1/self.dt length of time through the CTRNN governing
+		differential equations.
+		"""
 		previous_activations = self.activations
 		biased = CTRNN._sigmoid(previous_activations + self.biases)
 		with_weights = np.matmul(self.weights, biased)
@@ -76,7 +80,8 @@ class CTRNN:
 
 		shape : int or Tuple<int>
 		"""
-		return np.random.normal(loc=0.0, scale=1.0, size=shape)
+		return 4.0 * np.random.random(shape)
+		# return np.random.normal(loc=1.0, scale=1.0, size=shape)
 		# return np.zeros(shape)
 	
 	def _sigmoid(x):
