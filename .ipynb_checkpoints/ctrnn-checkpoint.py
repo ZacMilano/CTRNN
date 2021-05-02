@@ -57,10 +57,8 @@ class CTRNN:
 		self.time_constants = np.clip(time_constants, 10*self.dt, 100*self.dt) \
 			if time_constants is not None \
 			else self.dt * np.exp(2*np.log(10) * np.random.random(self.N))
-			# else CTRNN._default_weights(self.N)
 		self.inputs = inputs if inputs is not None \
 			else np.zeros(self.N)
-			# else CTRNN._default_weights(self.N)
 	
 	def step(self):
 		"""
@@ -76,11 +74,12 @@ class CTRNN:
 	def _default_weights(shape):
 		"""
 		Default value given to weights between neurons if no weights are provided
-		from instantiation.
+		from instantiation. Not used anymore.
 
 		shape : int or Tuple<int>
 		"""
 		return 4.0 * np.random.random(shape)
+		# A few other ideas I had for initial activations
 		# return np.random.normal(loc=1.0, scale=1.0, size=shape)
 		# return np.zeros(shape)
 	
